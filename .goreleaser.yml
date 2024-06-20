@@ -1,4 +1,5 @@
 project_name: kr8
+version: 2
 before:
   hooks:
   - go mod download
@@ -13,8 +14,7 @@ builds:
     ldflags: -s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.Date}}
     binary: kr8
 archives:
-  -
-    format: tar.gz
+  - format: tar.gz
     name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
     files:
     - licence*
@@ -43,6 +43,7 @@ nfpms:
   -
     vendor: Apptio TechOps
     homepage: "https://github.com/apptio/kr8"
+    maintainer: 'Apptio, an IBM Company'
     description: "Opinionated configuration management tool for Kubernetes Cluster"
     license: MIT
     formats:
@@ -50,11 +51,12 @@ nfpms:
       - deb
     bindir: /usr/local/bin
 brews:
-  -
-    tap:
-      owner: apptio
-      name: homebrew-tap
-      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
+  - name: kr8
+    url_template: "https://github.com/apptio/kr8/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
+    url_headers:
+    - "Accept: application/octet-stream"
+    - 'Authorization: bearer #{ENV["HOMEBREW_TAP_GITHUB_TOKEN"]}'
+    download_strategy: CurlDownloadStrategy
 
     commit_author:
       name: release
@@ -62,6 +64,7 @@ brews:
 
     homepage: "https://kr8.rocks"
     description: "Opinionated configuration management tool for Kubernetes Cluster"
+    license: MIT
     install: |
       bin.install "kr8"
       bin.install "scripts/kr8-helpers"
