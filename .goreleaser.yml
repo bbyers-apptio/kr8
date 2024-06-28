@@ -68,7 +68,7 @@ brews:
       email: release@apptio.com
     commit_msg_template: "Brew formula update for {{ .ProjectName }} version {{ .Tag }}"
 
-    homepage: "https://kr8.rocks"
+    homepage: "http://apptio.github.io/kr8"
     description: "Opinionated configuration management tool for Kubernetes Cluster"
     license: MIT
     install: |
