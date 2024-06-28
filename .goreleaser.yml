@@ -53,10 +53,20 @@ brews:
     - "Accept: application/octet-stream"
     - 'Authorization: bearer #{ENV["HOMEBREW_TAP_GITHUB_TOKEN"]}'
     download_strategy: CurlDownloadStrategy
+    repository:
+      owner: Apptio
+      name: homebrew-tap
+      branch: main
+      pull_request:
+        enabled: true
+      git:
+        url: 'git@github.com:apptio/homebrew-tap.git'
+        private_key: '{{ .Env.PRIVATE_KEY_PATH }}'
 
     commit_author:
       name: release
       email: release@apptio.com
+    commit_msg_template: "Brew formula update for {{ .ProjectName }} version {{ .Tag }}"
 
     homepage: "https://kr8.rocks"
     description: "Opinionated configuration management tool for Kubernetes Cluster"
