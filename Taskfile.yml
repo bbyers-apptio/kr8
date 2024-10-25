@@ -18,3 +18,9 @@ tasks:
       - pipenv run mkdocs build
       - pipenv run mkdocs gh-deploy
 
+  build:
+    desc: Build kr8
+    aliases:
+      - b
+    cmds:
+      - go build
