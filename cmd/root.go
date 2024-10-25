@@ -39,6 +39,8 @@ var (
 	clusterParams string
 	cluster       string
 	logLevel      string
+	cpuProfile    string
+	memProfile    string
 
 	debug       bool
 	colorOutput bool
@@ -76,6 +78,8 @@ func init() {
 	RootCmd.PersistentFlags().BoolVar(&colorOutput, "color", true, "enable colorized output (default). Set to false to disable")
 	RootCmd.PersistentFlags().StringArrayP("jpath", "J", nil, "Directories to add to jsonnet include path. Repeat arg for multiple directories")
 	RootCmd.PersistentFlags().StringSlice("ext-str-file", nil, "Set jsonnet extvar from file contents")
+	RootCmd.Flags().StringVarP(&cpuProfile, "cpuprofile", "", "", "write cpu profile to `file`")
+	RootCmd.Flags().StringVarP(&memProfile, "memprofile", "", "", "write memory profile to `file`")
 	viper.BindPFlag("base", RootCmd.PersistentFlags().Lookup("base"))
 	viper.BindPFlag("clusterdir", RootCmd.PersistentFlags().Lookup("clusterdir"))
 	viper.BindPFlag("componentdir", RootCmd.PersistentFlags().Lookup("componentdir"))

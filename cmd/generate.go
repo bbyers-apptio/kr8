@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"runtime"
+	"runtime/pprof"
 	"sort"
 	"strconv"
 	"strings"
@@ -420,6 +421,17 @@ var generateCmd = &cobra.Command{
 
 	Args: cobra.MinimumNArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
+		if cpuProfile != "" {
+			f, err := os.Create(cpuProfile)
+			if err != nil {
+				log.Fatal().Err(err).Msg("could not create CPU profile: ")
+			}
+			defer f.Close() // error handling omitted for example
+			if err := pprof.StartCPUProfile(f); err != nil {
+				log.Fatal().Err(err).Msg("could not create CPU profile: ")
+			}
+			defer pprof.StopCPUProfile()
+		}
 
 		var clusterList []string
 
@@ -536,6 +548,18 @@ var generateCmd = &cobra.Command{
 			})
 		}
 		wg.Wait()
+
+		if memProfile != "" {
+			f, err := os.Create(memProfile)
+			if err != nil {
+				log.Fatal().Err(err).Msg("could not write memory profile: ")
+			}
+			defer f.Close() // error handling omitted for example
+			runtime.GC()    // get up-to-date statistics
+			if err := pprof.WriteHeapProfile(f); err != nil {
+				log.Fatal().Err(err).Msg("could not write memory profile: ")
+			}
+		}
 	},
 }
 
@@ -548,6 +572,9 @@ func init() {
 	generateCmd.Flags().StringVarP(&clIncludes, "clincludes", "", "", "filter included cluster by including clusters with matching cluster parameters - comma separate list of key/value conditions separated by = or ~ (for regex match)")
 	generateCmd.Flags().StringVarP(&clExcludes, "clexcludes", "", "", "filter included cluster by excluding clusters with matching cluster parameters - comma separate list of key/value conditions separated by = or ~ (for regex match)")
 	generateCmd.Flags().IntP("parallel", "", runtime.GOMAXPROCS(0), "parallelism - defaults to GOMAXPROCS")
+	generateCmd.Flags().StringVarP(&cpuProfile, "cpuprofile", "", "", "write cpu profile to `file`")
+	generateCmd.Flags().StringVarP(&memProfile, "memprofile", "", "", "write memory profile to `file`")
+
 	viper.BindPFlag("clincludes", generateCmd.PersistentFlags().Lookup("clincludes"))
 	viper.BindPFlag("clexcludes", generateCmd.PersistentFlags().Lookup("clexcludes"))
 }
