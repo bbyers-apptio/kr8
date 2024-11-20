@@ -421,6 +421,7 @@ var generateCmd = &cobra.Command{
 
 	Args: cobra.MinimumNArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
+		// https://pkg.go.dev/runtime/pprof
 		if cpuProfile != "" {
 			f, err := os.Create(cpuProfile)
 			if err != nil {
