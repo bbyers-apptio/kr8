@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"encoding/json"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -13,6 +12,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/apptio/kr8/internal/util"
 	goyaml "github.com/ghodss/yaml"
 	jsonnet "github.com/google/go-jsonnet"
 	"github.com/panjf2000/ants/v2"
@@ -158,6 +158,10 @@ func genProcessCluster(cmd *cobra.Command, clusterName string, p *ants.Pool) {
 			genProcessComponent(cmd, clusterName, cName, clusterDir, clGenerateDir, config, &allconfig, postProcessorFunction, pruneParams, generateShortNames)
 		})
 	}
+
+	// generate component vm
+	// only generate files that have been modified
+	// based on
 	wg.Wait()
 
 }
@@ -181,7 +185,7 @@ func genProcessComponent(cmd *cobra.Command, clusterName string, componentName s
 	}
 
 	// it's faster to create this VM for each component, rather than re-use
-	vm, _ := JsonnetVM(cmd)
+	vm, _ := util.JsonnetVM(cmd, baseDir)
 	vm.ExtCode("kr8_cluster", "std.prune("+config+"._cluster)")
 	//vm.ExtCode("kr8_components", "std.prune("+config+"._components)")
 	if postProcessorFunction != "" {
@@ -240,7 +244,7 @@ func genProcessComponent(cmd *cobra.Command, clusterName string, componentName s
 	// file imports
 	for k, v := range spec["extfiles"].Map() {
 		vpath := baseDir + "/" + compPath + "/" + v.String() // use full path for file
-		extfile, err := ioutil.ReadFile(vpath)
+		extfile, err := os.ReadFile(vpath)
 		if err != nil {
 			log.Fatal().Err(err).Msg("Error importing extfile")
 		}
@@ -357,7 +361,7 @@ func genProcessComponent(cmd *cobra.Command, clusterName string, componentName s
 				Msg("Creating " + outputFile)
 			updateNeeded = true
 		} else {
-			currentContents, err := ioutil.ReadFile(outputFile)
+			currentContents, err := os.ReadFile(outputFile)
 			if err != nil {
 				log.Fatal().Err(err).Msg("Error reading file")
 			}
